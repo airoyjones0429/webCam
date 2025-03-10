@@ -3,17 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>即時視頻顯示</title>
+    <title>攝影機捕獲</title>
 </head>
 <body>
-    <h1>即時視頻顯示</h1>
-    <img id="videoStream" src="" alt="Video Stream" width="640" height="480" />
+    <h1>攝影機捕獲圖片</h1>
+    <button id="captureBtn">捕獲圖片</button>
+    <img id="capturedImage" src="" alt="捕獲的圖片" style="display:none;"/>
+
+    <h1>攝影機捕獲動態</h1>
+    <canvas id="capturedCanvas" width="640" height="480"></canvas>
+
     <script>
-        function updateFrame() {
-            const img = document.getElementById('videoStream');
-            img.src = '/capture?' + new Date().getTime(); // 每次請求新圖片
+        // 非同步的讀取圖片
+        async function updateFrame() {
+            const img = document.getElementById('capturedImage');
+            const canvas = document.getElementById('capturedCanvas');
+            const context = canvas.getContext('2d');
+
+            const response = await fetch('http://localhost:3000/capture');
+            const data = await response.json();
+
+            // 將 Base64 字串設置為 img 的 src
+            img.src = data.image; // 設定圖片的 src 為 Base64 字符串
+            img.style.display = 'block'; // 顯示圖片
+
+            // 將 Base64 圖片繪製到 canvas 上
+            const image = new Image();
+            image.src = data.image;
+            image.onload = () => {
+                context.drawImage(image, 0, 0, canvas.width, canvas.height);
+            };
         }
-        setInterval(updateFrame, 100); // 每100毫秒更新一次
+
+        setInterval(updateFrame, 500); // 每1000毫秒更新一次
     </script>
 </body>
 </html>

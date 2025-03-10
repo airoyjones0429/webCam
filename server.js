@@ -31,7 +31,7 @@ const opts = {
     // base64   返回捕獲圖片的 Base64 編碼字符串 這對於在網頁中直接嵌入圖片非常方便，
     //          因為你可以將 Base64 字符串直接用於 <img> 標籤的 src 屬性。
     // location 返回捕獲圖片的檔案路徑。這是最常用的選項，適合需要直接使用圖片檔案的情況。
-    callbackReturn: "location",
+    callbackReturn: "base64",
     // 如果為 true 會傳回，執行的命令
     verbose: false
 };
@@ -42,15 +42,21 @@ const Webcam = NodeWebcam.create(opts);
 // 提供靜態文件
 app.use(express.static('public'));
 
-// 捕獲圖片的路由
-app.get('/capture', async (req, res) => {
-    
-    //拍攝照片
-    Webcam.capture( "current_frame"); 
+app.get('/capture', (req, res) => {
+    // 拍攝照片
+    Webcam.capture("current_frame",  (err, base64Image) => {
+        if (err) {
+            console.error("捕獲圖片時發生錯誤:", err);
+            return res.status(500).send("捕獲圖片時發生錯誤");
+        }
+        // 返回圖片的 Base64 字符串
+        // res.json({ image: `data:image/png;base64,${base64Image}` });
 
-    //傳回照片檔案
-    res.sendFile(path.join(__dirname,"current_frame.png"));
+        // 返回圖片的 Base64 字符串 因為本身就帶有資料格式 所以不用上面那行指令
+        res.json({ image: `${base64Image}` });
+    });
 });
+
 
 
 // 啟動伺服器
