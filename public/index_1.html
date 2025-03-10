@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>USB Cameras</title>
+    <style>
+        #video {
+            width: 640px;
+            height: 480px;
+            background: black;
+        }
+    </style>
+</head>
+<body>
+    <h1>USB 攝影機影像</h1>
+    <h2>攝影機 1</h2>
+    <!-- 1140308 增加停止錄影功能 UI Start -->
+    <button id="stopButton">停止錄影</button>
+    <script> 
+        document.getElementById('stopButton').addEventListener('click', function() {
+            fetch('http://localhost:3001/stop', {
+                method: 'POST'
+            })
+            .then(response => response.text())
+            .then(data => {
+                console.log(data);
+                alert(data); // 顯示停止錄影的消息
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+    <!-- 1140308 增加停止錄影功能 UI  END -->
+    
+
+    <!-- 1140308 增加停止錄影功能 UI Start -->
+    <button id="startButton">開始錄影</button>
+    <script> 
+        document.getElementById('startButton').addEventListener('click', function() {
+            fetch('http://localhost:3001/start', {
+                method: 'POST'
+            })
+            .then(response => response.text())
+            .then(data => {
+                console.log(data);
+                alert(data); // 顯示開始錄影的消息
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+    <!-- 1140308 增加停止錄影功能 UI  END -->
+
+
+    <video id="video" controls autoplay></video>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script>
+        const video = document.getElementById('video');
+        const videoSrc = 'http://localhost:3001/hls/output_20250308032102.m3u8';
+
+        if (Hls.isSupported()) {
+            const hls = new Hls();
+            hls.loadSource(videoSrc);
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                video.play();
+            });
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = videoSrc;
+            video.addEventListener('loadedmetadata', function() {
+                video.play();
+            });
+        }
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+<!-- 
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>USB Cameras</title>
+    <link href="https://vjs.zencdn.net/7.11.4/video-js.css" rel="stylesheet" />
+</head>
+<body>
+    <h1>USB 攝影機影像</h1>
+    <h2>攝影機 1</h2>
+    <video id="my-video" class="video-js" controls autoplay width="640" height="480">
+        <source src="http://localhost:3001/hls/output.m3u8" type="application/x-mpegURL">
+        您的瀏覽器不支持 HTML5 視頻標籤。
+    </video>
+    <script src="https://vjs.zencdn.net/7.11.4/video.min.js"></script>
+</body>
+</html> -->
+
+
+<!-- 
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>USB Cameras</title>
+</head>
+<body>
+    <h1>USB 攝影機影像</h1>
+    <h2>攝影機 1</h2>
+    <img src="http://localhost:3001/cam1" alt="Camera 1" />
+    <h2>攝影機 2</h2>
+    <img src="http://localhost:3002/cam2" alt="Camera 2" />
+</body>
+</html> -->

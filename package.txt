@@ -1,0 +1,43 @@
+這是 package.json 的格式說明檔案
+
+{
+  "name": "webcam",                 專案名稱
+  "version": "1.0.0",               專案版本
+  "main": "server14.js",            伺服器檔案名稱
+  "bin": "server14.js",             伺服器進入點檔案名稱
+  "scripts": {                      執行命令            這裡定義了可以通過命令行執行的腳本
+    "start": "node server14.js"     這條命令用於啟動伺服器
+    "test": "echo \"Error: no test specified\" && exit 1",   添加測試命令
+    "build": "echo \"Building the project...\""              添加建構命令
+  },
+  "keywords": [],                   這是用於描述專案的關鍵字陣列，通常用於 npm 搜尋。                  
+  "author": "",                     專案作者的名稱
+  "license": "ISC",                 這裡使用的是 ISC 許可證
+  "type": "commonjs",               表示使用 CommonJS 模組系統
+  "description": "",                專案的簡短描述
+  "dependencies": {                 列出了專案所需的外部套件及其版本
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "fluent-ffmpeg": "^2.1.3",
+    "node-webcam": "^0.8.2"
+  },
+  "devDependencies": {              添加開發環境依賴
+    "nodemon": "^2.0.15"            例如使用 nodemon 來監控檔案變更
+  },  
+  "repository": {                                       添加版本控制資訊
+    "type": "git",
+    "url": "git+https://github.com/username/repo.git"   替換為您的 GitHub 倉庫 URL
+  },
+  "engines": {                                      指定支持的 Node.js 版本
+    "node": ">=14.0.0"
+  },  
+  "pkg": {                  封裝資訊                描述如何封裝專案的資訊
+    "targets": [            封裝成甚麼系統使用          這裡指定了目標平台
+      "node14-win-x64"
+    ],
+    "assets": [             封裝需要包含的資料結構      這裡指定了需要包含的資源
+      "public/*"
+    ]
+  }
+
+}
