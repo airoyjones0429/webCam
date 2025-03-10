@@ -1,10 +1,10 @@
 {
   "name": "webcam",
   "version": "1.0.0",
-  "main": "server14.js",
-  "bin": "server14.js",
+  "main": "server.js",
+  "bin": "server.js",
   "scripts": {
-    "start": "node server14.js"
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
