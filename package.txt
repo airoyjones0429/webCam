@@ -41,3 +41,9 @@
   }
 
 }
+
+伺服器執行方式 WIN10
+start node server.js
+
+public/index.html 是首頁
+node_modules/   安裝的模組都會在這裡
