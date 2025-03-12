@@ -1,41 +1,135 @@
+<!-- 搭配 server14.js 使用 -->
+
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>攝影機捕獲</title>
+    <title>USB Cameras</title>
+    <style>
+        #video {
+            /* width: 320px;
+            height: 240px; */
+            background: black;
+        }
+    </style>
 </head>
 <body>
-    <h1>攝影機捕獲圖片</h1>
-    <button id="captureBtn">捕獲圖片</button>
-    <img id="capturedImage" src="" alt="捕獲的圖片" style="display:none;"/>
-
-    <h1>攝影機捕獲動態</h1>
-    <canvas id="capturedCanvas" width="640" height="480"></canvas>
+    <h1>USB 攝影機影像</h1>
+    <h2>攝影機 1</h2>
+    <!-- <video id="video" controls autoplay></video>  會自動撥放 --> 
+    <!-- controls 顯示控制面板 要靜音才可以自動撥放 -->
+    <video id="video1" controls muted autoplay></video> 
+    <div id="paramDisplay" ></div>
+    <!-- 
+        使用 JS 撥放器 LIB 設定來源位置 
+        1140310 最新版本為 1.5.20
+    -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.20"></script>
 
     <script>
-        // 非同步的讀取圖片
-        async function updateFrame() {
-            const img = document.getElementById('capturedImage');
-            const canvas = document.getElementById('capturedCanvas');
-            const context = canvas.getContext('2d');
+        const video1 = document.getElementById('video1');
+        let hls; // 用來儲存 HLS 實例
 
-            const response = await fetch('http://localhost:3000/capture');
-            const data = await response.json();
+        // 從伺服端傳送參數過來 start
+        const urlParams = new URLSearchParams(window.location.search);
+        const someParam = urlParams.get('someParam'); // 獲取查詢參數
+        document.getElementById('paramDisplay').innerText = `傳遞的參數: ${someParam}`;
+        // 從伺服端傳送參數過來 end
 
-            // 將 Base64 字串設置為 img 的 src
-            img.src = data.image; // 設定圖片的 src 為 Base64 字符串
-            img.style.display = 'block'; // 顯示圖片
-
-            // 將 Base64 圖片繪製到 canvas 上
-            const image = new Image();
-            image.src = data.image;
-            image.onload = () => {
-                context.drawImage(image, 0, 0, canvas.width, canvas.height);
-            };
+        function fetchM3u8FileName(){
+            fetch('/api/hls-files')
+                .then(response => response.json())
+                .then(files => {
+                    // 假設檔案名稱是以時間戳命名，取最新的檔案
+                    const latestFile = files[files.length - 1]; // 假設檔案名稱是按時間排序
+                    playVideo(latestFile); // 播放最新的檔案
+                 })
+                .catch(error => {
+                    console.error('無法獲取 HLS 檔案:', error);
+                });
         }
 
-        setInterval(updateFrame, 500); // 每1000毫秒更新一次
+        //載入頁面時，找出最新的檔案，並且撥放
+        fetchM3u8FileName(); 
+       
+        /// 事件只能綁定一次
+        let isEndedEventBound = false;
+
+        // 以下是處理撥放器不受控制  撥放結束後  會一職轉圈
+        function playVideo(fileName) {
+            const videoSrc = `/hls/${fileName}`;
+            if (Hls.isSupported()) {
+                if (hls) {
+                    hls.destroy(); // 如果已有 HLS 實例，先銷毀它
+                }
+                hls = new Hls();
+                hls.loadSource(videoSrc);
+                hls.attachMedia(video1);
+                hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    console.log(' OK1 ');
+                    // 設定視訊為靜音，
+                    // 因為瀏覽器不會動撥放有聲音的視訊
+                    video1.muted = true; 
+                    video1.addEventListener('loadedmetadata', () => {
+                        // 獲取影片總長度（以秒為單位）
+                        const duration = video.duration;
+                        // 計算從最後 5 秒開始的時間點，用 max() 避免取到負值
+                        const startTime = Math.max(duration-5 , 0); 
+                        // 設定播放時間位置
+                        video1.currentTime = startTime;
+                        video1.play(); // 開始播放
+                    });
+                });
+
+            } else if (video1.canPlayType('application/vnd.apple.mpegurl')) {
+                video1.src = videoSrc;
+                video1.addEventListener('loadedmetadata', function() {
+                    console.log(' OK2 ');
+                    // 設定視訊為靜音，
+                    // 因為瀏覽器不會動撥放有聲音的視訊
+                    video1.muted = true; 
+                    video1.addEventListener('loadedmetadata', () => {
+                        // 獲取影片總長度（以秒為單位）
+                        const duration = video1.duration;
+                        // 計算從最後 5 秒開始的時間點，用 max() 避免取到負值
+                        const startTime = Math.max(duration-5 , 0); 
+                        // 設定播放時間位置
+                        video1.currentTime = startTime;
+                        video1.play(); // 開始播放
+                    });
+                });
+            }
+
+            if (!isEndedEventBound) {
+                isEndedEventBound =true ;
+                ///事件綁定  避免重複綁定
+                ///可以正確綁定的事件 pause
+                video1.addEventListener('pause',function() {
+                    console.log('當前播放狀態:', video1.currentTime);
+                });
+    
+                ///可以正確綁定的事件 play
+                video1.addEventListener('play',function() {
+                    console.log('當前播放狀態:', video1.currentTime);
+                });            
+                
+                // 監聽影片播放結束事件  
+                video1.addEventListener('ended', function() {
+                    console.log('當123前播放狀態:', video1.currentTime); //這裡也沒有執行
+                    // console.log('影1片播放結束'); //這個沒有出現在網頁 F12 中，所以加下面那行
+                    // alert('影2片播放結束'); // 顯示影片的元數據加載完成  這裡也沒出現
+                    // 這裡可以選擇自動播放下一個影片或顯示提示
+                    // 例如，清空影片源
+                    video1.src = '';
+                    if (hls) {
+                        alert('影片播放結束2'); // 顯示影片的元數據加載完成  這沒有出現
+                        hls.destroy(); // 銷毀 HLS 實例
+                        hls = null; // 清空 HLS 實例
+                    }
+                });            
+            }
+        }
     </script>
 </body>
 </html>

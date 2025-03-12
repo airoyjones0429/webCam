@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>雙邊網頁顯示</title>
+    <style>
+        body {
+            display: flex;
+            margin: 0;
+            height: 100vh;
+        }
+        iframe {
+            flex: 1; /* 使兩個 iframe 平分寬度 */
+            border: none; /* 去除邊框 */
+        }
+    </style>
+</head>
+<body>
+    <iframe src="http://localhost:3100"></iframe>
+    <iframe src="http://localhost:3200"></iframe>
+</body>
+</html>
